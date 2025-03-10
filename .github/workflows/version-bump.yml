@@ -52,6 +52,7 @@ jobs:
           echo "BRANCH_NAME=bump-version-to-$VERSION" >> $GITHUB_ENV
           echo "Extracted version: $VERSION"
 
+<<<<<<< Updated upstream
       # Create a new branch
       - name: Create branch
         run: |
@@ -60,6 +61,9 @@ jobs:
           git checkout -b ${{ env.BRANCH_NAME }}
 
       # Update version in package.json directly with Node.js
+=======
+      # Update version in package.json
+>>>>>>> Stashed changes
       - name: Update version in package.json
         run: |
 <<<<<<< Updated upstream
@@ -92,14 +96,7 @@ jobs:
           cat package.json
 >>>>>>> Stashed changes
 
-      # Commit changes
-      - name: Commit changes
-        run: |
-          git add package.json
-          git commit -m "chore: bump version to ${{ env.VERSION }}"
-          git push origin ${{ env.BRANCH_NAME }}
-
-      # Create Pull Request
+      # Create Pull Request (this will also create the branch)
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
