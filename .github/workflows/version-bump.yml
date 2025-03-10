@@ -6,6 +6,14 @@ on:
     tags:
       - 'v*' # This will match tags like v1.0.0, v2.3.1, etc.
 
+  # For testing purposes, you can also manually trigger this workflow
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to set (without v prefix)'
+        required: true
+        default: '1.0.0'
+
 jobs:
   update-version:
     runs-on: ubuntu-latest
@@ -20,12 +28,23 @@ jobs:
         with:
           fetch-depth: 0 # Fetch all history for proper branch creation
 
-      # Extract version from tag
-      - name: Extract version from tag
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      # Extract version from tag or input
+      - name: Extract version
         id: extract_version
         run: |
-          TAG=${GITHUB_REF#refs/tags/}
-          VERSION=${TAG#v}
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            TAG=${GITHUB_REF#refs/tags/}
+            VERSION=${TAG#v}
+          else
+            VERSION=${{ github.event.inputs.version }}
+          fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "BRANCH_NAME=bump-version-to-$VERSION" >> $GITHUB_ENV
           echo "Extracted version: $VERSION"
@@ -40,6 +59,9 @@ jobs:
       # Update version in package.json
       - name: Update version in package.json
         run: |
+          # Install dependencies first
+          yarn install --frozen-lockfile
+          
           # Use Yarn to update the version field in package.json
           yarn version --new-version ${{ env.VERSION }} --no-git-tag-version
           echo "Updated package.json version to ${{ env.VERSION }}"
