@@ -33,7 +33,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+<<<<<<< Updated upstream
           cache: 'yarn'
+=======
+>>>>>>> Stashed changes
 
       # Extract version from tag or input
       - name: Extract version
@@ -56,15 +59,38 @@ jobs:
           git config --global user.email 'actions@github.com'
           git checkout -b ${{ env.BRANCH_NAME }}
 
-      # Update version in package.json
+      # Update version in package.json directly with Node.js
       - name: Update version in package.json
         run: |
+<<<<<<< Updated upstream
           # Install dependencies first
           yarn install --frozen-lockfile
           
           # Use Yarn to update the version field in package.json
           yarn version --new-version ${{ env.VERSION }} --no-git-tag-version
           echo "Updated package.json version to ${{ env.VERSION }}"
+=======
+          # Use Node.js to directly update the version in package.json
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const packageJsonPath = path.resolve('./package.json');
+            
+            // Read the package.json file
+            const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+            
+            // Update the version
+            packageJson.version = '${{ env.VERSION }}';
+            
+            // Write the updated package.json back to disk
+            fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+            
+            console.log('Updated package.json version to ${{ env.VERSION }}');
+          "
+          
+          # Verify the update
+          cat package.json
+>>>>>>> Stashed changes
 
       # Commit changes
       - name: Commit changes
